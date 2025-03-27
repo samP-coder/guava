@@ -44,9 +44,9 @@ import org.jspecify.annotations.Nullable;
 public final class OptionalTest extends TestCase {
   @SuppressWarnings("NullOptional")
   public void testToJavaUtil_static() {
-    assertNull(Optional.toJavaUtil(null));
-    assertEquals(java.util.Optional.empty(), Optional.toJavaUtil(Optional.absent()));
-    assertEquals(java.util.Optional.of("abc"), Optional.toJavaUtil(Optional.of("abc")));
+    assertNull(Optional.toJavaUtilNullable(null));
+    assertEquals(java.util.Optional.empty(), Optional.toJavaUtilNullable(Optional.absent()));
+    assertEquals(java.util.Optional.of("abc"), Optional.toJavaUtilNullable(Optional.of("abc")));
   }
 
   public void testToJavaUtil_instance() {

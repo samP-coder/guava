@@ -139,27 +139,19 @@ public abstract class Optional<T> implements Serializable {
    * <p>If {@code googleOptional} is known to be non-null, use {@code googleOptional.toJavaUtil()}
    * instead.
    *
-   * <p>Unfortunately, the method reference {@code Optional::toJavaUtil} will not work, because it
-   * could refer to either the static or instance version of this method. Write out the lambda
-   * expression {@code o -> Optional.toJavaUtil(o)} instead.
-   *
    * @since 21.0 (but only since 33.4.0 in the Android flavor)
    */
   @SuppressWarnings({
     "AmbiguousMethodReference", // We chose the name despite knowing this risk.
     "NullableOptional", // Null passthrough is reasonable for type conversions
   })
-  public static <T> java.util.@Nullable Optional<T> toJavaUtil(
+  public static <T> java.util.@Nullable Optional<T> toJavaUtilNullable(
       @Nullable Optional<T> googleOptional) {
     return googleOptional == null ? null : googleOptional.toJavaUtil();
   }
 
   /**
    * Returns the equivalent {@code java.util.Optional} value to this optional.
-   *
-   * <p>Unfortunately, the method reference {@code Optional::toJavaUtil} will not work, because it
-   * could refer to either the static or instance version of this method. Write out the lambda
-   * expression {@code o -> o.toJavaUtil()} instead.
    *
    * @since 21.0 (but only since 33.4.0 in the Android flavor)
    */
