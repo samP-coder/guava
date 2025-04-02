@@ -111,6 +111,7 @@ public final class InetAddresses {
   private static final CharMatcher IPV6_DELIMITER_MATCHER = CharMatcher.is(IPV6_DELIMITER);
   private static final Inet4Address LOOPBACK4 = (Inet4Address) forString("127.0.0.1");
   private static final Inet4Address ANY4 = (Inet4Address) forString("0.0.0.0");
+  private static final int MAX_PORTS  = 0xffff;
 
   private InetAddresses() {}
 
@@ -768,10 +769,10 @@ public final class InetAddresses {
     public TeredoInfo(
         @Nullable Inet4Address server, @Nullable Inet4Address client, int port, int flags) {
       checkArgument(
-          (port >= 0) && (port <= 0xffff), "port '%s' is out of range (0 <= port <= 0xffff)", port);
+          (port >= 0) && (port <= MAX_PORTS), "port '%s' is out of range (0 <= port <= MAX_PORTS)", port);
       checkArgument(
-          (flags >= 0) && (flags <= 0xffff),
-          "flags '%s' is out of range (0 <= flags <= 0xffff)",
+          (flags >= 0) && (flags <= MAX_PORTS),
+          "flags '%s' is out of range (0 <= flags <= MAX_PORTS)",
           flags);
 
       this.server = MoreObjects.firstNonNull(server, ANY4);
@@ -826,10 +827,10 @@ public final class InetAddresses {
     byte[] bytes = ip.getAddress();
     Inet4Address server = getInet4Address(Arrays.copyOfRange(bytes, 4, 8));
 
-    int flags = ByteStreams.newDataInput(bytes, 8).readShort() & 0xffff;
+    int flags = ByteStreams.newDataInput(bytes, 8).readShort() & MAX_PORTS;
 
     // Teredo obfuscates the mapped client port, per section 4 of the RFC.
-    int port = ~ByteStreams.newDataInput(bytes, 10).readShort() & 0xffff;
+    int port = ~ByteStreams.newDataInput(bytes, 10).readShort() & MAX_PORTS;
 
     byte[] clientBytes = Arrays.copyOfRange(bytes, 12, 16);
     for (int i = 0; i < clientBytes.length; i++) {
