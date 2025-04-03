@@ -239,6 +239,13 @@ public final class InetAddresses {
     return null;
   }
 
+  /**
+   * Returns an IPv4 string literal to a list of bytes representing this IP address.
+   * Return {@code null} if the parseOctet method throw a NumberFormatException.
+   *
+   * @param ipString {@code String} evaluated as an IPv4 string literal
+   * @return the list of bytes from the {@code ipString} parameter
+   */
   private static byte @Nullable [] textToNumericFormatV4(String ipString) {
     if (IPV4_DELIMITER_MATCHER.countIn(ipString) + 1 != IPV4_PART_COUNT) {
       return null; // Wrong number of parts
@@ -260,10 +267,17 @@ public final class InetAddresses {
       }
       start = end + 1;
     }
-
     return bytes;
   }
 
+  /**
+   * Returns an IPv6 string literal to a list of bytes representing this IP address.
+   * Return {@code null} if the parseOctet method throw a NumberFormatException or
+   * if the format does not respect an IPv6 format.
+   *
+   * @param ipString {@code String} evaluated as an IPv6 string literal
+   * @return an array of bytes from the {@code ipString} parameter
+   */
   private static byte @Nullable [] textToNumericFormatV6(String ipString) {
     // An address can have [2..8] colons.
     int delimiterCount = IPV6_DELIMITER_MATCHER.countIn(ipString);
@@ -347,6 +361,14 @@ public final class InetAddresses {
     return initialPart + penultimate + ":" + ultimate;
   }
 
+  /**
+   * Transform an octet string representing an octet on an IP address to a byte format and returns the octet in the new format.
+   *
+   * @param ipString {@code String} to evaluated as an IP string literal
+   * @param start {@code int} the beginning index of the IP string part
+   * @param end {@code int} the end index of the IP string part
+   * @return the octet representing the IP string part in byte format
+   */
   private static byte parseOctet(String ipString, int start, int end) {
     // Note: we already verified that this string contains only hex digits, but the string may still
     // contain non-decimal characters.
