@@ -20,8 +20,9 @@ module com.google.common.testlib {
   requires static com.google.errorprone.annotations;
   requires static com.google.j2objc.annotations;
   requires static org.jspecify;
+    requires junit;
 
-  exports com.google.common.collect.testing;
+    exports com.google.common.collect.testing;
   exports com.google.common.collect.testing.features;
   exports com.google.common.collect.testing.google;
   exports com.google.common.collect.testing.testers;
