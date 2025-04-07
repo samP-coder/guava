@@ -372,9 +372,9 @@ public final class InetAddresses {
 
     byte[] bytes = ip.getAddress();
     if ((bytes[12] == 0)
-        && (bytes[13] == 0)
-        && (bytes[14] == 0)
-        && ((bytes[15] == 0) || (bytes[15] == 1))) {
+            && (bytes[13] == 0)
+            && (bytes[14] == 0)
+            && ((bytes[15] == 0) || (bytes[15] == 1))) {
       return false;
     }
 
@@ -390,7 +390,7 @@ public final class InetAddresses {
    */
   public static Inet4Address getCompatIPv4Address(Inet6Address ip) {
     checkArgument(
-        isCompatIPv4Address(ip), "Address '%s' is not IPv4-compatible.", toAddrString(ip));
+            isCompatIPv4Address(ip), "Address '%s' is not IPv4-compatible.", toAddrString(ip));
 
     return getInet4Address(Arrays.copyOfRange(ip.getAddress(), 12, 16));
   }
@@ -438,9 +438,9 @@ public final class InetAddresses {
   public static boolean isTeredoAddress(Inet6Address ip) {
     byte[] bytes = ip.getAddress();
     return (bytes[0] == (byte) 0x20)
-        && (bytes[1] == (byte) 0x01)
-        && (bytes[2] == 0)
-        && (bytes[3] == 0);
+            && (bytes[1] == (byte) 0x01)
+            && (bytes[2] == 0)
+            && (bytes[3] == 0);
   }
 
   /**
@@ -820,7 +820,7 @@ public final class InetAddresses {
   }
 
   private static IllegalArgumentException formatIllegalArgumentException(
-      String format, Object... args) {
+          String format, Object... args) {
     return new IllegalArgumentException(String.format(Locale.ROOT, format, args));
   }
 
@@ -921,27 +921,20 @@ public final class InetAddresses {
   }
 
   /**
-   * Returns an IPv6 string literal to a list of bytes representing this IP address.
-   * Return {@code null} if the parseOctet method throw a NumberFormatException or
-   * if the format does not respect an IPv6 format.
-   *
-   * @param ipString {@code String} evaluated as an IPv6 string literal
-   * @return an array of bytes from the {@code ipString} parameter
+   * Check if the number of ipv6 separator "::" is correct. Return the number of partSkipped, else return -1.
+   * @param ipString the ipv6 string literal
+   * @param delimiterCount the number of ipv6 separator ":".
+   * @return the number of partSkipped or -1.
    */
-  private static byte @Nullable [] textToNumericFormatV6(String ipString) {
-    // An address can have [2..8] colons.
-    int delimiterCount = IPV6_DELIMITER_MATCHER.countIn(ipString);
-    if (delimiterCount < 2 || delimiterCount > IPV6_PART_COUNT) {
-      return null;
-    }
-    int partsSkipped = IPV6_PART_COUNT - (delimiterCount + 1); // estimate; may be modified later
+  private static int checkNumberOfIpv6Separator(String ipString, int delimiterCount) {
     boolean hasSkip = false;
+    int partsSkipped = IPV6_PART_COUNT - (delimiterCount + 1);
     // Scan for the appearance of ::, to mark a skip-format IPV6 string and adjust the partsSkipped
     // estimate.
     for (int i = 0; i < ipString.length() - 1; i++) {
       if (ipString.charAt(i) == IPV6_DELIMITER && ipString.charAt(i + 1) == IPV6_DELIMITER) {
         if (hasSkip) {
-          return null; // Can't have more than one ::
+          return -1; // Can't have more than one ::
         }
         hasSkip = true;
         partsSkipped++; // :: means we skipped an extra part in between the two delimiters.
@@ -953,20 +946,50 @@ public final class InetAddresses {
         }
       }
     }
-    if (ipString.charAt(0) == IPV6_DELIMITER && ipString.charAt(1) != IPV6_DELIMITER) {
-      return null; // ^: requires ^::
-    }
-    if (ipString.charAt(ipString.length() - 1) == IPV6_DELIMITER
-            && ipString.charAt(ipString.length() - 2) != IPV6_DELIMITER) {
-      return null; // :$ requires ::$
-    }
     if (hasSkip && partsSkipped <= 0) {
-      return null; // :: must expand to at least one '0'
+      return -1; // :: must expand to at least one '0'
     }
     if (!hasSkip && delimiterCount + 1 != IPV6_PART_COUNT) {
-      return null; // Incorrect number of parts
+      return -1; // Incorrect number of parts
     }
+    return partsSkipped;
+  }
 
+
+  /**
+   * Check if the IP string literal is in correct format. Return -1 if not, else return the number of parts skipped.
+   * @param ipString the ip string to check
+   * @return -1 if it is not a correct format, else the number of parts skipped
+   */
+  private static int checkIpv6Format(String ipString) {
+    int delimiterCount = IPV6_DELIMITER_MATCHER.countIn(ipString);
+    int partsSkipped = checkNumberOfIpv6Separator(ipString, delimiterCount);
+    if (delimiterCount < 2 || delimiterCount > IPV6_PART_COUNT) {
+      return -1;
+    }
+    // estimate; may be modified later
+    if (ipString.charAt(0) == IPV6_DELIMITER && ipString.charAt(1) != IPV6_DELIMITER) {
+      return -1; // ^: requires ^::
+    }
+    if (ipString.charAt(ipString.length() - 1) == IPV6_DELIMITER && ipString.charAt(ipString.length() - 2) != IPV6_DELIMITER) {
+      return -1; // :$ requires ::$
+    }
+    return partsSkipped;
+  }
+
+  /**
+   * Returns an IPv6 string literal to a list of bytes representing this IP address.
+   * Return {@code null} if the parseOctet method throw a NumberFormatException or
+   * if the format does not respect an IPv6 format.
+   *
+   * @param ipString {@code String} evaluated as an IPv6 string literal
+   * @return an array of bytes from the {@code ipString} parameter
+   */
+  private static byte @Nullable [] textToNumericFormatV6(String ipString) {
+    int partsSkipped = checkIpv6Format(ipString);
+    if (partsSkipped == -1) {
+      return null;
+    }
     ByteBuffer rawBytes = ByteBuffer.allocate(2 * IPV6_PART_COUNT);
     try {
       // Iterate through the parts of the ip string.
@@ -1262,3 +1285,4 @@ public final class InetAddresses {
     }
   }
 }
+
