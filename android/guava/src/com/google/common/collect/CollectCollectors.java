@@ -106,43 +106,6 @@ final class CollectCollectors {
         Collector.Characteristics.UNORDERED);
   }
 
-  @IgnoreJRERequirement // see enclosing class (whose annotation Animal Sniffer ignores here...)
-  private static final class EnumSetAccumulator<E extends Enum<E>> {
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    static final Collector<Enum<?>, ?, ImmutableSet<? extends Enum<?>>> TO_IMMUTABLE_ENUM_SET =
-        (Collector) toImmutableEnumSetGeneric();
-
-    private @Nullable EnumSet<E> set;
-
-    void add(E e) {
-      if (set == null) {
-        set = EnumSet.of(e);
-      } else {
-        set.add(e);
-      }
-    }
-
-    EnumSetAccumulator<E> combine(EnumSetAccumulator<E> other) {
-      if (this.set == null) {
-        return other;
-      } else if (other.set == null) {
-        return this;
-      } else {
-        this.set.addAll(other.set);
-        return this;
-      }
-    }
-
-    ImmutableSet<E> toImmutableSet() {
-      if (set == null) {
-        return ImmutableSet.of();
-      }
-      ImmutableSet<E> ret = ImmutableEnumSet.asImmutable(set);
-      set = null; // subsequent manual manipulation of the accumulator mustn't affect ret
-      return ret;
-    }
-  }
-
   @GwtIncompatible
   @SuppressWarnings({"rawtypes", "unchecked"})
   static <E extends Comparable<? super E>>
